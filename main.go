@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type ClasseProvider interface {
 	GetClasse() *Classe
+	Atacar(ppAtacante, ppDefensor ClasseProvider) (*Classe, *Classe)
 	Desviar() bool
 	Defender() bool
 	Castar() bool
@@ -34,27 +34,34 @@ func (c *Classe) Ataque() int {
 	return c.ataque
 }
 
-func Atacar(ppAtacante, ppDefensor ClasseProvider) *Classe {
+func Atacar(ppAtacante, ppDefensor ClasseProvider) (*Classe, *Classe) {
+	var (
+		aDanoCausadoAoDefensor int
+		aDanoCausadoAoAtacante int
+	)
 
-	if reflect.TypeOf(ppAtacante).Name() == "Mago" && ppAtacante.Castar() {
+	if /* reflect.TypeOf(ppAtacante).Name() == "Mago" && */ ppAtacante.Castar() {
 		// procou o double damage
 		aAtaque := ppAtacante.GetClasse().ataque
-		aDanoCausadoAoDefensor := aAtaque * 2
+		aDanoCausadoAoDefensor = aAtaque * 2
 		fmt.Println(">>>>DOUBLE DAMAGE<<<<")
 	}
 
-	if reflect.TypeOf(ppDefensor).Name() == "Arqueiro" && ppDefensor.Desviar() {
+	if /* reflect.TypeOf(ppDefensor).Name() == "Arqueiro" && */ ppDefensor.Desviar() {
 		// procou o evasion
-		aDanoCausadoAoDefensor := 0
+		aDanoCausadoAoDefensor = 0
 		fmt.Println(">>>>EVASION<<<<")
-	}
-
-	if reflect.TypeOf(ppDefensor).Name() == "Guerreiro" && ppDefensor.Defender() {
+	} else if /* reflect.TypeOf(ppDefensor).Name() == "Guerreiro" && */ ppDefensor.Defender() {
 		// procou o ADO
-		aDanoCausadoAoDefensor := ppAtacante.GetClasse().ataque
-		aDanoCausadoAoAtacante := ppDefensor.GetClasse().ataque
+		aDanoCausadoAoDefensor = ppAtacante.GetClasse().ataque
+		aDanoCausadoAoAtacante = ppDefensor.GetClasse().ataque
 		fmt.Println(">>>>ATAQUE DE OPORTUNIDADE<<<<")
 	}
+
+	ppDefensor.GetClasse().vida = -aDanoCausadoAoDefensor
+	ppAtacante.GetClasse().vida = -aDanoCausadoAoAtacante
+
+	return ppAtacante.GetClasse(), ppDefensor.GetClasse()
 }
 
 type Arqueiro struct {
@@ -92,18 +99,22 @@ func main() {
 	a := Arqueiro{Classe: Classe{vida: 10, defesa: 3, ataque: 5}}
 	fmt.Println("Arqueiro")
 	fmt.Println("  > Vida: ", a.vida)
-	fmt.Println("  > Defesa: ", a.defesa)
-	fmt.Println("  > Ataque: ", a.ataque)
+	//fmt.Println("  > Defesa: ", a.defesa)
+	//fmt.Println("  > Ataque: ", a.ataque)
 
 	g := Guerreiro{Classe: Classe{vida: 15, defesa: 6, ataque: 2}}
 	fmt.Println("Guerreiro")
 	fmt.Println("  > Vida: ", g.vida)
-	fmt.Println("  > Defesa: ", g.defesa)
-	fmt.Println("  > Ataque: ", g.ataque)
+	//fmt.Println("  > Defesa: ", g.defesa)
+	//fmt.Println("  > Ataque: ", g.ataque)
 
-	m := Mago{Classe: Classe{vida: 8, defesa: 2, ataque: 8}}
-	fmt.Println("Mago")
-	fmt.Println("  > Vida: ", m.vida)
-	fmt.Println("  > Defesa: ", m.defesa)
-	fmt.Println("  > Ataque: ", m.ataque)
+	a, g = Atacar(a.GetClasse(), g.GetClasse())
+
+	/*
+		m := Mago{Classe: Classe{vida: 8, defesa: 2, ataque: 8}}
+		fmt.Println("Mago")
+		fmt.Println("  > Vida: ", m.vida)
+		fmt.Println("  > Defesa: ", m.defesa)
+		fmt.Println("  > Ataque: ", m.ataque)
+	*/
 }
